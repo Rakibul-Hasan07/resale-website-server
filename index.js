@@ -16,11 +16,19 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 
 async function run() {
     try {
-        const hpCollection = client.db('resaleProducts').collection('hpLaptop')
+        const productsCollection = client.db('resaleProducts').collection('allProducts');
+        const categoryCollection = client.db('resaleProducts').collection('category');
 
-        app.get('/hp-collection', async (req, res) => {
+        app.get('/category', async (req, res) => {
             const query = {};
-            const result = await hpCollection.find(query).toArray();
+            const result = await categoryCollection.find(query).toArray();
+            res.send(result);
+        })
+        app.get('/category/products/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { categoryId: id };
+            const result = await productsCollection.findOne(query);
+            // const matchedId = products.find(product => product.category.id === id)
             res.send(result);
         })
     }
