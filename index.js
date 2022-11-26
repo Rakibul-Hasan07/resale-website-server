@@ -19,6 +19,7 @@ async function run() {
         const productsCollection = client.db('resaleProducts').collection('allProducts');
         const categoryCollection = client.db('resaleProducts').collection('category');
         const usersCollection = client.db('resaleProducts').collection('users')
+        const bookingsCollection = client.db('resaleProducts').collection('bookings')
 
         app.get('/category', async (req, res) => {
             const query = {};
@@ -53,13 +54,23 @@ async function run() {
             const email = req.params.email;
             const query = { email: email }
             const user = await usersCollection.findOne(query)
-            res.send({ isAdmin: user?.role === 'buyer' })
+            res.send({ isBuyer: user?.role === 'buyer' })
         })
         app.get('/users/seller/:email', async (req, res) => {
             const email = req.params.email;
             const query = { email: email }
             const user = await usersCollection.findOne(query)
-            res.send({ isAdmin: user?.role === 'seller' })
+            res.send({ isSeller: user?.role === 'seller' })
+        })
+        app.get('/users', async (req, res) => {
+            const query = {}
+            const user = await usersCollection.find(query).toArray();
+            res.send(user)
+        })
+        app.post('/bookings', async (req, res) => {
+            const booking = req.body;
+            const result = await bookingsCollection.insertOne(booking)
+            res.send(result)
         })
     }
     catch (error) {
