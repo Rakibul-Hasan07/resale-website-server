@@ -29,13 +29,37 @@ async function run() {
             const id = req.params.id;
             const query = { categoryId: id };
             const result = await productsCollection.findOne(query);
-            // const matchedId = products.find(product => product.category.id === id)
             res.send(result);
         })
         app.post('/users', async (req, res) => {
             const users = req.body;
             const result = await usersCollection.insertOne(users);
             res.send(result);
+        })
+
+        app.get('/users/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email: email };
+            const result = await usersCollection.findOne(query);
+            res.send(result);
+        })
+        app.get('/users/admin/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email: email }
+            const user = await usersCollection.findOne(query)
+            res.send({ isAdmin: user?.role === 'admin' })
+        })
+        app.get('/users/buyer/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email: email }
+            const user = await usersCollection.findOne(query)
+            res.send({ isAdmin: user?.role === 'buyer' })
+        })
+        app.get('/users/seller/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email: email }
+            const user = await usersCollection.findOne(query)
+            res.send({ isAdmin: user?.role === 'seller' })
         })
     }
     catch (error) {
