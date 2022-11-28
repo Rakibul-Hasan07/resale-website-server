@@ -59,7 +59,7 @@ async function run() {
         app.get('/blogs', async (req, res) => {
             const query = {};
             const result = await blogsCollection.find(query).toArray();
-            res.send(result)
+            res.send(result);
         })
         
     }
