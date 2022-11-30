@@ -1,8 +1,8 @@
 const express = require('express');
+const cors = require('cors')
 const app = express();
 const port = process.env.PORT || 5000;
-const { MongoClient, ServerApiVersion } = require('mongodb');
-const cors = require('cors')
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 const jwt = require('jsonwebtoken')
 
@@ -43,6 +43,7 @@ async function run() {
         const bookingsCollection = client.db('resaleProducts').collection('bookings')
         const blogsCollection = client.db('resaleProducts').collection('blogs')
         const addProductsCollection = client.db('resaleProducts').collection('addProducts')
+        const advertiseCollection = client.db('resaleProducts').collection('advertise')
 
         app.get('/category', async (req, res) => {
             const query = {};
@@ -60,6 +61,49 @@ async function run() {
             const result = await usersCollection.insertOne(users);
             res.send(result);
         })
+        app.get('/users/:email', async (req, res) => {
+            const email = req.params.email;
+            console.log(email);
+            const query = { email: email };
+            const result = await usersCollection.findOne(query);
+            res.send(result);
+        })
+
+        app.get('/seller', async (req, res) => {
+            const result = await usersCollection.find({ role: 'seller' }).toArray();
+            res.send(result)
+        })
+        app.delete('/seller/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) }
+            const result = await usersCollection.deleteOne(query);
+            res.send(result);
+        })
+        app.get('/buyer', async (req, res) => {
+            const result = await usersCollection.find({ role: 'buyer' }).toArray();
+            res.send(result)
+        })
+        app.delete('/buyer/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) }
+            const result = await usersCollection.deleteOne(query);
+            res.send(result);
+        })
+
+        // app.get('/users/all-user', async (req, res) => {
+        //     const email = req.query.email;
+        //     const query = { email: email }
+        //     const user = await usersCollection.findOne(query)
+        //     if (user) {
+        //         return res.send({ isAdmin: user?.role === 'admin', role: 'admin' })
+        //     }
+        //     if (user) {
+        //         return res.send({ isSeller: user?.role === 'seller', role: 'seller' })
+        //     }
+        //     if (user) {
+        //         return res.send({ isBuyer: user?.role === 'buyer', role: 'buyer' })
+        //     }
+        // })
 
 
         app.post('/bookings', async (req, res) => {
@@ -87,6 +131,27 @@ async function run() {
             const query = { email: email }
             const result = await addProductsCollection.find(query).toArray();
             res.send(result)
+        })
+        app.delete('/add-products/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) }
+            const result = await addProductsCollection.deleteOne(query)
+            res.send(result)
+        })
+        app.post('/add-advertise', async (req, res) => {
+            const advertise = req.body;
+            const query = { productName: advertise.productName }
+            const alreadyAdvertised = await advertiseCollection.find(query).toArray();
+            if (alreadyAdvertised.length) {
+                return res.send({ acknowledged: false, message: 'Already Advertised' })
+            }
+            const result = await advertiseCollection.insertOne(advertise);
+            res.send(result);
+        })
+        app.get('/add-advertise', async (req, res) => {
+            const query = {};
+            const result = await advertiseCollection.find(query).toArray();
+            res.send(result);
         })
         // Json web token
         app.get('/jwt', async (req, res) => {
