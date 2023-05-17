@@ -5,18 +5,26 @@ const port = process.env.PORT || 5000;
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 const jwt = require('jsonwebtoken')
+const paymentRouter = require('./routers/v1/payment.route')
 
 
 //middle ware
 app.use(cors());
 app.use(express.json());
 
+
+
 app.get('/', (req, res) => {
     res.send('resale server are running')
 })
 
+
+
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.9wccxu2.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
+
+app.use('/api/v1/payment', paymentRouter)
+
 
 //json web token middleware
 const verifyJWT = (req, res, next) => {
@@ -45,6 +53,8 @@ async function run() {
         const addProductsCollection = client.db('resaleProducts').collection('addProducts')
         const advertiseCollection = client.db('resaleProducts').collection('advertise')
 
+        
+
         app.get('/category', async (req, res) => {
             const query = {};
             const result = await categoryCollection.find(query).toArray();
@@ -68,7 +78,7 @@ async function run() {
             const result = await usersCollection.findOne(query);
             res.send(result);
         })
-
+       
         app.get('/seller', async (req, res) => {
             const result = await usersCollection.find({ role: 'seller' }).toArray();
             res.send(result)
@@ -164,6 +174,7 @@ async function run() {
             }
             res.status(401).send({ accessToken: '' })
         })
+
     }
     catch (error) {
         console.log(error);
