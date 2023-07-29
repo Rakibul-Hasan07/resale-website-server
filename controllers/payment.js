@@ -1,12 +1,12 @@
-
-const { ObjectId } = require('mongodb')
 const SSLCommerzPayment = require('sslcommerz-lts')
 const store_id = process.env.STORE_ID
 const store_passwd = process.env.STORE_PASSWORD
 const is_live = false //true for live, false for sandbox
+const paymentModel = require('../Models/paymentModels')
 
 module.exports.paymentInit = (req, res) => {
-    const paymentData = req.body.payData;
+    const paymentData = paymentModel(req.body)
+    console.log(paymentData)
     
     // console.log(store_id, store_passwd, is)
     //sslcommerz init
