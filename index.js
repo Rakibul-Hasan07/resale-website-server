@@ -12,6 +12,7 @@ const blogRouter = require('./routers/v1/blogs.route')
 const productsRouter = require('./routers/v1/products.route')
 const advertiseRouter = require('./routers/v1/advertise.route')
 const bookingRouter = require('./routers/v1/booking.route')
+const recentProductRouter = require('./routers/v1/recentProduct.route')
 
 mongoose.connect(uri, {
     useNewUrlParser: true,
@@ -39,6 +40,7 @@ app.use('/api/v1', blogRouter)
 app.use('/api/v1', productsRouter)
 app.use('/api/v1', advertiseRouter)
 app.use('/api/v1', bookingRouter)
+app.use('/api/v1', recentProductRouter)
 
 
 app.listen(port, () => {
