@@ -1,6 +1,8 @@
 const bookingModels = require('../Models/bookingModels')
 
 const saveBookingsData = async (req, res) => {
+    console.log('first')
+    console.log(req.body)
     try {
         const booking = req.body;
         const result = new bookingModels(booking)

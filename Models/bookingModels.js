@@ -1,14 +1,14 @@
 const { default: mongoose } = require("mongoose");
 
 const bookingSchema = mongoose.Schema({
-    name: { type: String, required: true },
-    email: { type: String, required: true },
-    productName: { type: String, required: true },
-    price: { type: Number, required: true },
-    phone: { type: Number, required: true },
-    place: { type: String, required: true },
-    date: { type: Number, required: true }
+    name: String,
+    email: String,
+    productName: String,
+    price: String,
+    phone: String,
+    place: String,
+    date: String
 })
 
-const bookingModels = mongoose.model('booking', bookingSchema)
+const bookingModels = mongoose.model('bookings', bookingSchema)
 module.exports = bookingModels;
