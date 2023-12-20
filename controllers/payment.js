@@ -5,20 +5,24 @@ const is_live = false //true for live, false for sandbox
 const paymentModel = require('../Models/paymentModels')
 
 module.exports.paymentInit = (req, res) => {
-    const paymentData = paymentModel(req.body)
-    console.log(paymentData)
-    
-    // console.log(store_id, store_passwd, is)
+    const { payData } = req.body;
+    if (!payData) {
+        return res.status(400).json({ error: 'payData is required in the request body.' });
+    }
+
+    const paymentData = paymentModel(payData);
+
+    // console.log(store_id, store_passwd)
     //sslcommerz init
 
     const data = {
-        total_amount: paymentData.price,
+        total_amount: parseFloat(paymentData.price),
         currency: "BDT",
         tran_id: paymentData.transactionId, // use unique tran_id for each api call
-        success_url: 'http://localhost:3030/success',
-        fail_url: 'http://localhost:3030/fail',
-        cancel_url: 'http://localhost:3030/cancel',
-        ipn_url: 'http://localhost:3030/ipn',
+        success_url: 'http://localhost:3000/success',
+        fail_url: 'http://localhost:3000/fail',
+        cancel_url: 'http://localhost:3000/cancel',
+        ipn_url: 'http://localhost:3000/ipn',
         shipping_method: 'Courier',
         product_name: paymentData.productName,
         product_category: 'Electronic',
@@ -45,8 +49,8 @@ module.exports.paymentInit = (req, res) => {
     const sslcz = new SSLCommerzPayment(store_id, store_passwd, is_live)
     sslcz.init(data).then(apiResponse => {
         // Redirect the user to payment gateway
+        console.log(apiResponse)
         let GatewayPageURL = apiResponse.GatewayPageURL
-        res.send(GatewayPageURL)
-        console.log('Redirecting to: ', GatewayPageURL)
+        return res.send(GatewayPageURL)
     });
 }
