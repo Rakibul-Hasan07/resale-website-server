@@ -13,4 +13,16 @@ const saveBookingsData = async (req, res) => {
     }
 }
 
-module.exports = { saveBookingsData }
+const getBookingsData = async (req, res) => {
+    try {
+        const email = req.query.email;
+        console.log(email)
+        const result = await bookingModels.find({ email: email });
+        console.log(result)
+        res.send(result)
+    } catch (error) {
+        res.status(404).send('Server Error')
+    }
+}
+
+module.exports = { saveBookingsData,getBookingsData }

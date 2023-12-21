@@ -7,7 +7,7 @@ const PaymentSchema = mongoose.Schema({
     year: Number,
     transactionId: Number,
     paymentType: Boolean,
-    _id: Number,
+    _id: String,
     email: String,
     phone: Number
 })

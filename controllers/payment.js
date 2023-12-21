@@ -4,23 +4,24 @@ const store_passwd = process.env.STORE_PASSWORD
 const is_live = false //true for live, false for sandbox
 const paymentModel = require('../Models/paymentModels')
 
-module.exports.paymentInit = (req, res) => {
+const paymentInit = async (req, res) => {
     const { payData } = req.body;
     if (!payData) {
         return res.status(400).json({ error: 'payData is required in the request body.' });
     }
 
-    const paymentData = paymentModel(payData);
+    const paymentData = new paymentModel(payData);
+    console.log(paymentData)
 
-    // console.log(store_id, store_passwd)
+    //console.log(store_id, store_passwd)
     //sslcommerz init
 
     const data = {
         total_amount: parseFloat(paymentData.price),
         currency: "BDT",
         tran_id: paymentData.transactionId, // use unique tran_id for each api call
-        success_url: 'http://localhost:3000/success',
-        fail_url: 'http://localhost:3000/fail',
+        success_url: `https://resale-website-server.vercel.app/api/v1/payment/success?transactionId=${paymentData?.transactionId}`,
+        fail_url: `https://resale-website-server.vercel.app/api/v1/payment/fail?transactionId=${paymentData?.transactionId}`,
         cancel_url: 'http://localhost:3000/cancel',
         ipn_url: 'http://localhost:3000/ipn',
         shipping_method: 'Courier',
@@ -49,8 +50,50 @@ module.exports.paymentInit = (req, res) => {
     const sslcz = new SSLCommerzPayment(store_id, store_passwd, is_live)
     sslcz.init(data).then(apiResponse => {
         // Redirect the user to payment gateway
-        console.log(apiResponse)
         let GatewayPageURL = apiResponse.GatewayPageURL
-        return res.send(GatewayPageURL)
+        paymentData.save();
+        res.send(GatewayPageURL)
     });
 }
+
+const paymentSuccess = async (req, res) => {
+    console.log(req.query)
+    try {
+        const { transactionId } = req.query;
+        const findProduct = await paymentModel.findOne({ transactionId: transactionId });
+        await paymentModel.updateOne(
+            { transactionId: transactionId },
+            { $set: { paymentType: true, paidAt: new Date() } }
+        );
+        res.redirect(
+            `https://resale-product.vercel.app//payment/success?transactionId=${transactionId}`
+        );
+    } catch (error) {
+        res.status(500).send({ error: " server error" });
+    }
+}
+
+const getDataByTransactionId = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const data = await paymentModel.findOne({ transactionId: id });
+        res.status(200).json({
+            result: data,
+            message: "success",
+        });
+    } catch (err) {
+        res.status(500).json({
+            message: "server error",
+        });
+    }
+}
+
+const paymentFail = async (req, res) => {
+    const { transactionId } = req.query;
+    await Payment.deleteOne({ transactionId: transactionId });
+    // console.log(transactionId);
+    res.redirect(
+        `https://resale-product.vercel.app//payment/fail?transactionId=${transactionId}`
+    );
+}
+module.exports = { paymentInit, paymentSuccess, getDataByTransactionId, paymentFail }
